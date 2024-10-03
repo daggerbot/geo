@@ -15,20 +15,6 @@ using namespace geo;
 //==================================================================================================
 // Client
 
-Client::Client()
-{
-}
-
-Client::~Client()
-{
-}
-
-Client& Client::get()
-{
-    static Client instance;
-    return instance;
-}
-
 void Client::set_state(std::unique_ptr<ClientState>&& state)
 {
     if (state)
@@ -41,12 +27,12 @@ void Client::update_state()
 {
     while (m_pendingState && !m_quitRequested) {
         if (m_currentState) {
-            m_currentState->end_state();
+            m_currentState->end_state(*this);
             if (m_quitRequested)
                 break;
         }
         m_currentState = std::move(m_pendingState);
-        m_currentState->begin_state();
+        m_currentState->begin_state(*this);
     }
 }
 
@@ -57,23 +43,23 @@ ClientState::~ClientState()
 {
 }
 
-void ClientState::begin_state()
+void ClientState::begin_state(Client&)
 {
 }
 
-void ClientState::end_state()
+void ClientState::end_state(Client&)
 {
 }
 
-void ClientState::on_quit()
+void ClientState::on_quit(Client&)
 {
 }
 
-void ClientState::render(u32)
+void ClientState::render(Client& client, u32)
 {
-    RenderSystem::get().clear();
+    client.render()->clear();
 }
 
-void ClientState::update(u32)
+void ClientState::update(Client&, u32)
 {
 }

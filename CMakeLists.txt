@@ -82,6 +82,7 @@ add_subdirectory("assets")
 set(RUN_ARGS)
 
 set(RUN_COMMAND "" CACHE STRING "Command prefix for running the game executable")
+set(DEBUG_COMMAND "gdb" "--args" CACHE STRING "Command prefix for debugging the game executable")
 
 if(CMAKE_GENERATOR STREQUAL "Ninja" OR CMAKE_GENERATOR STREQUAL "Unix Makefiles")
     add_custom_target("run"
@@ -91,6 +92,16 @@ if(CMAKE_GENERATOR STREQUAL "Ninja" OR CMAKE_GENERATOR STREQUAL "Unix Makefiles"
 
     add_custom_target("run-verbose"
         COMMAND ${RUN_COMMAND} "$<TARGET_FILE:geo_client>" "-verbose" ${RUN_ARGS}
+        DEPENDS "geo_client" "pak"
+        USES_TERMINAL)
+
+    add_custom_target("debug"
+        COMMAND ${DEBUG_COMMAND} "$<TARGET_FILE:geo_client>" ${RUN_ARGS}
+        DEPENDS "geo_client" "pak"
+        USES_TERMINAL)
+
+    add_custom_target("debug-verbose"
+        COMMAND ${DEBUG_COMMAND} "$<TARGET_FILE:geo_client>" "-verbose" ${RUN_ARGS}
         DEPENDS "geo_client" "pak"
         USES_TERMINAL)
 endif()

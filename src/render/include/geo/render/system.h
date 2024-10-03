@@ -11,6 +11,8 @@
 
 #include <geo/graphics/color.h>
 
+#include "gl/loader.h"
+
 namespace geo {
 
     class GlLoader;
@@ -21,27 +23,17 @@ namespace geo {
     /// Global rendering subsystem.
     class RenderSystem {
     public:
+        RenderSystem();
         RenderSystem(const RenderSystem&) = delete;
+        ~RenderSystem();
+
         RenderSystem& operator=(const RenderSystem&) = delete;
 
-        void initialize();
+        void initialize(GlLoader& glLoader);
         void shut_down();
 
         /// Clears the color buffer to the specified color.
         void clear(Col4f color = 0);
-
-        /// Gets the global render system instance.
-        static RenderSystem& get();
-
-        /// (OpenGL only) Sets the OpenGL symbol loader. This must be set before calling
-        /// @ref initialize.
-        void set_gl_loader(GlLoader* loader) { m_glLoader = loader; }
-
-    private:
-        GlLoader* m_glLoader = nullptr;
-
-        RenderSystem();
-        ~RenderSystem();
     };
 
     /// @}

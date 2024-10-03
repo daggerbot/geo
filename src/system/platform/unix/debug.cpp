@@ -9,136 +9,145 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <mutex>
+
 #include <geo/system/debug.h>
 #include <geo/system/system.h>
 
 using namespace geo;
 
-// ANSI escape sequences for changing the color of log messages.
-#define ANSI_RESET "\x1b[0m"
-#define ANSI_BOLD "\x1b[1m"
-#define ANSI_FAINT "\x1b[2m"
-#define ANSI_BLACK "\x1b[30m"
-#define ANSI_RED "\x1b[31m"
-#define ANSI_GREEN "\x1b[32m"
-#define ANSI_YELLOW "\x1b[33m"
-#define ANSI_BLUE "\x1b[34m"
-#define ANSI_MAGENTA "\x1b[35m"
-#define ANSI_CYAN "\x1b[36m"
-#define ANSI_WHITE "\x1b[37m"
+namespace geo::debug::internal {
 
-LogSystem::LogSystem()
+    struct LoggerState {
+        std::recursive_mutex mutex;
+        bool locked = false; // Secondary lock to prevent recursive messages
+        std::string fatalMessage;
+
+        static LoggerState& get_instance()
+        {
+            static LoggerState instance;
+            return instance;
+        }
+
+    private:
+        LoggerState()
+        {
+            // stderr is unbuffered by default. By making it buffered, we can improve logging
+            // performance a bit by reducing the number of syscalls made, likely to a single write()
+            // per message.
+            static char stderrBuffer[BUFSIZ];
+            ::setbuf(stderr, stderrBuffer);
+        }
+
+        ~LoggerState()
+        {
+        }
+    };
+
+} // namespace geo::debug::internal
+
+namespace {
+
+    LogLevel s_maxLogLevel =
+#ifdef NDEBUG
+        LogLevel::notice;
+#else
+        LogLevel::debug;
+#endif
+
+} // namespace
+
+void debug::enable_verbose()
 {
-    static char stderr_buffer[BUFSIZ];
-
-    // stderr is unbuffered by default. Making it buffered can improve logging performance a bit by
-    // reducing the number of syscalls made, likely to a single write() per message.
-    ::setbuf(stderr, stderr_buffer);
+#ifdef NDEBUG
+    s_maxLogLevel = LogLevel::info;
+#else
+    s_maxLogLevel = LogLevel::trace;
+#endif
 }
 
-LogSystem::~LogSystem()
+bool debug::internal::log_begin(LogLevel level, out<LoggerState*> outState)
 {
-}
+    static const char* prefixes[] = {
+        // NOTE: The weird sequences here are ANSI escape sequences for changing text colors.
+        "\x1b[1;31mERROR: \x1b[0m",
+        "\x1b[1;33mWARNING: \x1b[0m",
+        "\x1b[1;35mNOTICE: \x1b[0m",
+        "\x1b[1;34mINFO: \x1b[0m",
+        "\x1b[1;32mDEBUG: \x1b[0m",
+        "\x1b[2;36mTRACE: \x1b[0;2m",
+    };
 
-LogSystem& LogSystem::get()
-{
-    static LogSystem instance;
-    return instance;
-}
-
-bool LogSystem::log_begin(LogLevel level)
-{
-    const char* prefix;
-
-    if (level < LogLevel::min || level > m_maxLevel)
+    if (level > s_maxLogLevel)
         return false;
 
-    switch (level) {
-    case LogLevel::fatal:
-        prefix = ANSI_BOLD ANSI_RED "FATAL ERROR: " ANSI_RESET;
-        break;
-    case LogLevel::error:
-        prefix = ANSI_BOLD ANSI_RED "ERROR: " ANSI_RESET;
-        break;
-    case LogLevel::warning:
-        prefix = ANSI_BOLD ANSI_YELLOW "WARNING: " ANSI_RESET;
-        break;
-    case LogLevel::notice:
-        prefix = ANSI_BOLD ANSI_MAGENTA "NOTICE: " ANSI_RESET;
-        break;
-    case LogLevel::info:
-        prefix = ANSI_BOLD ANSI_BLUE "INFO: " ANSI_RESET;
-        break;
-    case LogLevel::debug:
-        prefix = ANSI_BOLD ANSI_GREEN "DEBUG: " ANSI_RESET;
-        break;
-    case LogLevel::trace:
-        prefix = ANSI_FAINT ANSI_CYAN "TRACE: " ANSI_RESET ANSI_FAINT;
-        break;
-    default:
+    auto state = &LoggerState::get_instance();
+    state->mutex.lock();
+
+    if (state->locked) {
+        // Don't start a log message when we're already in the middle of one on the same thread.
+        state->mutex.unlock();
         return false;
     }
 
-    m_mutex.lock();
-
-    if (m_locked) {
-        // Prevent recursive log messages on the same thread.
-        m_mutex.unlock();
-        return false;
-    }
-
-    m_locked = true;
-    ::fputs(prefix, stderr);
+    state->locked = true;
+    ::fputs(prefixes[unsigned(level)], stderr);
+    *outState = state;
     return true;
 }
 
-void LogSystem::log_write(oschar_t ch)
+void debug::internal::log_write(oschar_t ch)
 {
     ::fputc(ch, stderr);
 }
 
-void LogSystem::log_end(const oschar_t* file, int line)
+void debug::internal::log_end(LoggerState* state)
 {
-    if (file) {
-        ::fprintf(stderr, ANSI_FAINT " (%s:%d)", file, line);
-    }
-
-    ::fputs(ANSI_RESET "\n", stderr);
+    ::fputs("\x1b[0m\n", stderr);
     ::fflush(stderr);
-    m_locked = false;
-    m_mutex.unlock();
+    state->locked = false;
+    state->mutex.unlock();
 }
 
-void LogSystem::fatal_begin()
+void debug::internal::log_end(LoggerState* state, const oschar_t* sourceFileName, int sourceLine)
 {
-    m_mutex.lock();
+    ::fprintf(stderr, " \x1b[2m(%s:%d)", sourceFileName, sourceLine);
+    internal::log_end(state);
+}
 
-    if (m_locked) {
-        // We're interrupting another log message.
+void debug::internal::fatal_begin(out<LoggerState*> outState)
+{
+    auto state = &LoggerState::get_instance();
+    state->mutex.lock();
+
+    if (state->locked) {
+        // We're interrupting another message.
         ::fputc('\n', stderr);
-        m_fatalMessage.clear();
+        state->fatalMessage.clear();
     } else {
-        m_locked = true;
-    }
-}
-
-void LogSystem::fatal_write(oschar_t ch)
-{
-    m_fatalMessage.push_back(ch);
-}
-
-void LogSystem::fatal_end(const oschar_t* file, int line)
-{
-    ::fputs(ANSI_BOLD ANSI_RED "FATAL ERROR: " ANSI_RESET, stderr);
-    ::fputs(m_fatalMessage.c_str(), stderr);
-
-    if (file) {
-        ::fprintf(stderr, ANSI_FAINT " (%s:%d)", file, line);
-        format::write([this](oschar_t ch) { m_fatalMessage.push_back(ch); }, " ({}:{})", file, line);
+        state->locked = true;
     }
 
-    ::fputs(ANSI_RESET "\n", stderr);
+    *outState = state;
+}
+
+void debug::internal::fatal_write(LoggerState* state, oschar_t ch)
+{
+    state->fatalMessage.push_back(ch);
+}
+
+void debug::internal::fatal_end(LoggerState* state, const oschar_t* sourceFileName, int sourceLine)
+{
+    ::fputs("\x1b[1;31mFATAL ERROR: \x1b[0m", stderr);
+    ::fputs(state->fatalMessage.c_str(), stderr);
+
+    if (sourceFileName) {
+        ::fprintf(stderr, " \x1b[2m(%s:%d)", sourceFileName, sourceLine);
+        format::write([&](oschar_t ch) { state->fatalMessage.push_back(ch); }, " ({}:{})", sourceFileName, sourceLine);
+    }
+
+    ::fputs("\x1b[0m\n", stderr);
     ::fflush(stderr);
-    system::show_error_dialog(m_fatalMessage.c_str());
+    system::show_error_dialog(state->fatalMessage.c_str());
     ::exit(EXIT_FAILURE);
 }

@@ -25,14 +25,14 @@ namespace geo {
     /// Game rendering surface.
     class Display : public GlLoader {
     public:
+        Display();
         Display(const Display&) = delete;
+        ~Display();
+
         Display& operator=(const Display&) = delete;
 
         void initialize();
         void shut_down();
-
-        /// Gets the global display instance.
-        static Display& get();
 
         /// Loads an OpenGL symbol.
         void* gl_get_proc_address(const char* name) override;
@@ -46,9 +46,6 @@ namespace geo {
     private:
         std::unique_ptr<SDL_Window, void (*)(SDL_Window*)> m_window;
         std::unique_ptr<void, void (*)(SDL_GLContext)> m_glContext;
-
-        Display();
-        ~Display();
     };
 
     /// @}

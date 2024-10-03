@@ -26,7 +26,7 @@ namespace {
     {
         for (int i = 1; i < argc; ++i) {
             if (string_utils::equals(argv[i], OSSTR "-verbose")) {
-                LogSystem::get().enable_verbose();
+                debug::enable_verbose();
             } else if (argv[i][0] == '-') {
                 FATAL("Invalid option: {}", argv[i]);
             } else {
@@ -38,20 +38,19 @@ namespace {
     /// Cross-platform entry point.
     int geo_main(int argc, const oschar_t* const argv[])
     {
+        Client client;
+
         ::handle_command_line(argc, argv);
 
         LOG_INFO("Initializing...");
-        Display::get().initialize();
-        RenderSystem::get().set_gl_loader(&Display::get());
-        RenderSystem::get().initialize();
-        Client::get().set_state(std::make_unique<Playground>());
+        client.initialize();
+        client.set_state(std::make_unique<Playground>());
 
         LOG_INFO("Game started!");
-        Client::get().main_loop();
+        client.main_loop();
 
         LOG_INFO("Shutting down...");
-        RenderSystem::get().shut_down();
-        Display::get().shut_down();
+        client.shut_down();
 
         return 0;
     }

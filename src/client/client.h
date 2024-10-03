@@ -13,9 +13,14 @@
 
 #include <geo/core/types.h>
 
+union SDL_Event;
+struct SDL_WindowEvent;
+
 namespace geo {
 
     class ClientState;
+    class Display;
+    class RenderSystem;
 
     /// @addtogroup geo_client
     /// @{
@@ -23,39 +28,44 @@ namespace geo {
     /// Manages the logical state of the game client.
     class Client {
     public:
+        Client();
         Client(const Client&) = delete;
+        ~Client();
+
         Client& operator=(const Client&) = delete;
 
-        /// Returns a pointer to the current client state.
-        ClientState* current_state() { return m_currentState.get(); }
-
-        /// Returns the global client instance.
-        static Client& get();
-
-        /// Returns true if the quit signal has been sent to the client.
-        bool is_quitting() const { return m_quitRequested; }
-
-        /// Runs the game's main loop.
+        void initialize();
         void main_loop();
+        void shut_down();
+
+        /// Returns a pointer to the render surface.
+        Display* display() { return m_display.get(); }
 
         /// Signals the main loop to terminate.
         void quit() { m_quitRequested = true; }
+
+        /// Returns a pointer to the render system.
+        RenderSystem* render() { return m_render.get(); }
 
         /// Sets the game state to change to. The change is actually deferred to a time in which it
         /// is safe to do so.
         void set_state(std::unique_ptr<ClientState>&& state);
 
+    private:
+        std::unique_ptr<Display> m_display;
+        std::unique_ptr<RenderSystem> m_render;
+
+        std::unique_ptr<ClientState> m_currentState;
+        std::unique_ptr<ClientState> m_pendingState;
+        bool m_quitRequested = false;
+
         /// Switches to the pending client state. This must not be called when processing an event,
         /// as it may result in the current state being deleted.
         void update_state();
 
-    private:
-        bool m_quitRequested = false;
-        std::unique_ptr<ClientState> m_currentState;
-        std::unique_ptr<ClientState> m_pendingState;
-
-        Client();
-        ~Client();
+        void handle_pending_events();
+        void handle_event(const SDL_Event& event);
+        void handle_window_event(const SDL_WindowEvent& event);
     };
 
     /// Game client event handler.
@@ -66,19 +76,19 @@ namespace geo {
         ClientState& operator=(const ClientState&) = delete;
 
         /// Invoked just after this state is made current.
-        virtual void begin_state();
+        virtual void begin_state(Client& client);
 
         /// Invoked just before another state is made current.
-        virtual void end_state();
+        virtual void end_state(Client& client);
 
         /// Invoked just before the game quits.
-        virtual void on_quit();
+        virtual void on_quit(Client& client);
 
         /// Renders a frame.
-        virtual void render(u32 delta_ms);
+        virtual void render(Client& client, u32 delta_ms);
 
         /// Updates the game state just before rendering.
-        virtual void update(u32 delta_ms);
+        virtual void update(Client& client, u32 delta_ms);
     };
 
     /// @}

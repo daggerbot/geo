@@ -40,7 +40,7 @@ target_include_directories("glad" PUBLIC "${GLAD_INCLUDE_DIR}")
 # Build geo_render
 
 add_library("geo_render" STATIC
-    "gl/render_system.cpp"
+    "gl/system.cpp"
 )
 
 target_include_directories("geo_render" PUBLIC "include" "${GENERATED_INCLUDE_DIR}")

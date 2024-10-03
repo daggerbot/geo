@@ -9,6 +9,7 @@
 #include <SDL_events.h>
 #include <SDL_timer.h>
 
+#include <geo/render/system.h>
 #include <geo/system/debug.h>
 
 #include "../../client.h"
@@ -16,62 +17,37 @@
 
 using namespace geo;
 
-namespace {
+Client::Client()
+{
+}
 
-    void handle_window_event(Client& client, const SDL_WindowEvent& event)
-    {
-        switch (event.event) {
-        case SDL_WINDOWEVENT_CLOSE:
-            client.quit();
-            break;
+Client::~Client()
+{
+    shut_down();
+}
 
-        default:
-            break;
-        }
-    }
+void Client::initialize()
+{
+    m_display = std::make_unique<Display>();
+    m_display->initialize();
 
-    void handle_event(Client& client, const SDL_Event& event)
-    {
-        switch (event.type) {
-        case SDL_QUIT:
-            client.quit();
-            break;
-
-        case SDL_WINDOWEVENT:
-            ::handle_window_event(client, event.window);
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    void handle_pending_events(Client& client)
-    {
-        SDL_Event event;
-
-        while (!client.is_quitting() && ::SDL_PollEvent(&event)) {
-            ::handle_event(client, event);
-            client.update_state();
-        }
-    }
-
-} // namespace
+    m_render = std::make_unique<RenderSystem>();
+    m_render->initialize(*m_display);
+}
 
 void Client::main_loop()
 {
-    u32 current_ms;
     u32 prev_ms = ::SDL_GetTicks();
+    u32 current_ms;
     u32 delta_ms;
 
-    Display& display = Display::get();
-
+    // Make sure the initial client state was set.
     update_state();
     DASSERT(m_currentState != nullptr);
 
     while (!m_quitRequested) {
         // Handle window and input events.
-        ::handle_pending_events(*this);
+        handle_pending_events();
         if (m_quitRequested)
             break;
 
@@ -81,16 +57,59 @@ void Client::main_loop()
         prev_ms = current_ms;
 
         // Update the game state.
-        m_currentState->update(delta_ms);
+        m_currentState->update(*this, delta_ms);
         update_state();
         if (m_quitRequested)
             break;
 
         // Render the scene.
-        m_currentState->render(delta_ms);
+        m_currentState->render(*this, delta_ms);
         update_state();
-        display.swap_buffers();
+        m_display->swap_buffers();
     }
 
-    m_currentState->on_quit();
+    m_currentState->on_quit(*this);
+}
+
+void Client::shut_down()
+{
+    m_render.reset();
+    m_display.reset();
+}
+
+void Client::handle_pending_events()
+{
+    SDL_Event event;
+
+    while (!m_quitRequested && ::SDL_PollEvent(&event)) {
+        handle_event(event);
+        update_state();
+    }
+}
+
+void Client::handle_event(const SDL_Event& event)
+{
+    switch (event.type) {
+    case SDL_QUIT:
+        quit();
+        break;
+
+    case SDL_WINDOWEVENT:
+        handle_window_event(event.window);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void Client::handle_window_event(const SDL_WindowEvent& event)
+{
+    switch (event.event) {
+    case SDL_WINDOWEVENT_CLOSE:
+        quit();
+        break;
+    default:
+        break;
+    }
 }

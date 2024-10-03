@@ -76,11 +76,10 @@ RenderSystem::~RenderSystem()
 {
 }
 
-void RenderSystem::initialize()
+void RenderSystem::initialize(GlLoader& glLoader)
 {
-    DASSERT(m_glLoader != nullptr);
-    ::check_gl_version(*m_glLoader);
-    ::load_gl_api(*m_glLoader);
+    ::check_gl_version(glLoader);
+    ::load_gl_api(glLoader);
 }
 
 void RenderSystem::shut_down()
@@ -91,10 +90,4 @@ void RenderSystem::clear(Col4f color)
 {
     ::glad_glClearColor(color.r, color.g, color.g, color.a);
     ::glad_glClear(GL_COLOR_BUFFER_BIT);
-}
-
-RenderSystem& RenderSystem::get()
-{
-    static RenderSystem instance;
-    return instance;
 }

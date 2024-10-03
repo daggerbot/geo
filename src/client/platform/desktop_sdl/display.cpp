@@ -88,12 +88,6 @@ void Display::shut_down()
     }
 }
 
-Display& Display::get()
-{
-    static Display instance;
-    return instance;
-}
-
 void* Display::gl_get_proc_address(const char* name)
 {
     return ::SDL_GL_GetProcAddress(name);
