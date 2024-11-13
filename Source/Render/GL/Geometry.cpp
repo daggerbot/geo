@@ -13,7 +13,6 @@
 #include "Buffer.h"
 #include "Geometry.h"
 #include "Gl.h"
-#include "System.h"
 
 using namespace Geo;
 
@@ -67,8 +66,6 @@ GlRenderGeometry::~GlRenderGeometry()
 
 void GlRenderGeometry::SetVertexBuffer(int index, const std::shared_ptr<RenderBuffer>& vertexBuffer)
 {
-    GlRenderSystem& system = GlRenderSystem::GetInstance();
-
     ASSERT(index >= 0 && index < VertexBufferCount);
     ASSERT(vertexBuffer && vertexBuffer->GetType() == RenderBufferType::Vertex);
 

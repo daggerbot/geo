@@ -48,6 +48,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         "_WIN32_WINNT=0x0400"
         "NOMINMAX"
     )
+    target_link_options("GeoCompilerOptions" INTERFACE "-municode")
 endif()
 
 #===================================================================================================

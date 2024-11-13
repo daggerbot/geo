@@ -14,6 +14,8 @@
 #include <Core/Format.h>
 #include <Core/StringTypes.h>
 
+#include "Encoding.h"
+
 /// @addtogroup System
 /// @{
 
@@ -50,7 +52,7 @@
 #elif defined(LOG_NO_SOURCE)
 # define FATAL(FMT, ...) ::Geo::Debug::Internal::Fatal<OSSTR FMT>(__VA_ARGS__)
 #else
-# define FATAL(FMT, ...) ::Geo::Debug::Internal::FatalSrc<OSSTR FMT>(__FILE__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
+# define FATAL(FMT, ...) ::Geo::Debug::Internal::FatalSrc<OSSTR FMT>(OSSTR __FILE__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 /// @def LOG_ERROR
@@ -60,7 +62,7 @@
 #elif defined(LOG_NO_SOURCE)
 # define LOG_ERROR(FMT, ...) ::Geo::Debug::Internal::Log<OSSTR FMT>(::Geo::LogLevel::Error __VA_OPT__(,) __VA_ARGS__)
 #else
-# define LOG_ERROR(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(__FILE__, __LINE__, ::Geo::LogLevel::Error __VA_OPT__(,) __VA_ARGS__)
+# define LOG_ERROR(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(OSSTR __FILE__, __LINE__, ::Geo::LogLevel::Error __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 /// @def LOG_WARNING
@@ -70,7 +72,7 @@
 #elif defined(LOG_NO_SOURCE)
 # define LOG_WARNING(FMT, ...) ::Geo::Debug::Internal::Log<OSSTR FMT>(::Geo::LogLevel::Warning __VA_OPT__(,) __VA_ARGS__)
 #else
-# define LOG_WARNING(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(__FILE__, __LINE__, ::Geo::LogLevel::Warning __VA_OPT__(,) __VA_ARGS__)
+# define LOG_WARNING(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(OSSTR __FILE__, __LINE__, ::Geo::LogLevel::Warning __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 /// @def LOG_INFO
@@ -80,7 +82,7 @@
 #elif defined(LOG_NO_SOURCE)
 # define LOG_INFO(FMT, ...) ::Geo::Debug::Internal::Log<OSSTR FMT>(::Geo::LogLevel::Info __VA_OPT__(,) __VA_ARGS__)
 #else
-# define LOG_INFO(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(__FILE__, __LINE__, ::Geo::LogLevel::Info __VA_OPT__(,) __VA_ARGS__)
+# define LOG_INFO(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(OSSTR __FILE__, __LINE__, ::Geo::LogLevel::Info __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 /// @def LOG_DEBUG
@@ -90,7 +92,7 @@
 #elif defined(LOG_NO_SOURCE)
 # define LOG_DEBUG(FMT, ...) ::Geo::Debug::Internal::Log<OSSTR FMT>(::Geo::LogLevel::Debug __VA_OPT__(,) __VA_ARGS__)
 #else
-# define LOG_DEBUG(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(__FILE__, __LINE__, ::Geo::LogLevel::Debug __VA_OPT__(,) __VA_ARGS__)
+# define LOG_DEBUG(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(OSSTR __FILE__, __LINE__, ::Geo::LogLevel::Debug __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 /// @def LOG_TRACE
@@ -100,7 +102,7 @@
 #elif defined(LOG_NO_SOURCE)
 # define LOG_TRACE(FMT, ...) ::Geo::Debug::Internal::Log<OSSTR FMT>(::Geo::LogLevel::Trace __VA_OPT__(,) __VA_ARGS__)
 #else
-# define LOG_TRACE(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(__FILE__, __LINE__, ::Geo::LogLevel::Trace __VA_OPT__(,) __VA_ARGS__)
+# define LOG_TRACE(FMT, ...) ::Geo::Debug::Internal::LogSrc<OSSTR FMT>(OSSTR __FILE__, __LINE__, ::Geo::LogLevel::Trace __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 /// @def ASSERT
@@ -113,7 +115,7 @@
 #elif defined(LOG_NO_SOURCE)
 # define ASSERT(x) do { if (!(x)) ::Geo::Debug::Internal::Fatal<OSSTR "Assertion failed: {}">(#x); } while (0)
 #else
-# define ASSERT(x) do { if (!(x)) ::Geo::Debug::Internal::FatalSrc<OSSTR "Assertion failed: {}">(__FILE__, __LINE__, #x); } while (0)
+# define ASSERT(x) do { if (!(x)) ::Geo::Debug::Internal::FatalSrc<OSSTR "Assertion failed: {}">(OSSTR __FILE__, __LINE__, #x); } while (0)
 #endif
 
 /// @}
@@ -136,6 +138,10 @@ namespace Geo {
 
     /// Debugging utilities.
     namespace Debug {
+
+        /// (Windows only) Enables the log console. On other platforms, `stderr` is used for logging
+        /// so this does nothing.
+        void EnableConsole();
 
         /// Sets the global maximum log level.
         void SetMaxLogLevel(LogLevel level);

@@ -24,7 +24,10 @@ bool ClientParams::HandleShortOption(oschar_t, CommandLineContext& context)
 
 bool ClientParams::HandleLongOption(OsStringView option, CommandLineContext& context)
 {
-    if (option == OSSTR "log-level") {
+    if (option == OSSTR "console") {
+        Debug::EnableConsole();
+        return true;
+    } else if (option == OSSTR "log-level") {
         auto level = Debug::ParseLogLevel(context.ExpectParam());
 
         if (!level)

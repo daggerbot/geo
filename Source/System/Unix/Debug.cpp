@@ -49,6 +49,10 @@ namespace {
 
 } // namespace
 
+void Debug::EnableConsole()
+{
+}
+
 void Debug::SetMaxLogLevel(LogLevel level)
 {
     s_maxLogLevel = Math::Clamp(level, LogLevel::Off, LogLevel(LOG_LEVEL_MAX));

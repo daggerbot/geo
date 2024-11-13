@@ -13,6 +13,9 @@
 #include <SDL.h>
 
 #include <Client/Playground.h>
+#ifdef _WIN32
+# include <System/Windows/Win32.h>
+#endif
 #include <System/Debug.h>
 #include <System/System.h>
 
@@ -160,6 +163,7 @@ namespace {
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 {
+    Win32::SetMessageBoxHandler(&MessageBoxW);
     return ClientMain(__argc, __wargv);
 }
 
