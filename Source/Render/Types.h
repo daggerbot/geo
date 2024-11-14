@@ -49,7 +49,7 @@ namespace Geo {
         StreamCopy, ///< Data is frequently updated and copied by the GPU; useful for temporary data shared among GPU processes.
     };
 
-    /// Vertex type for @ref RenderMode::Color.
+    /// Vertex type for @ref VertexLayout::Color.
     struct ColorVertex {
         Vec3f position;
         Rgbaf color;

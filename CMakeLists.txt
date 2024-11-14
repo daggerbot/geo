@@ -85,6 +85,7 @@ set_property(TARGET "venv" APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${VENV_DIR}")
 
 add_subdirectory("Source")
 add_subdirectory("Assets")
+add_subdirectory("Documentation/API")
 
 #===================================================================================================
 # Test run

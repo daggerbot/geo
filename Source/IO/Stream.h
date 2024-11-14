@@ -66,7 +66,7 @@ namespace Geo {
         size_t Read(void* dst, size_t size, Error& outError);
 
         /// Attempts to read exactly `size` bytes from the stream into `dst`. This repeatedly calls
-        /// @ref ReadPartail until the requested data has been fully read or an error occurs. If the
+        /// @ref ReadPartial until the requested data has been fully read or an error occurs. If the
         /// end of the stream is reached before `size` bytes are read, it is treated as an error
         /// (@ref IoErrorCode::EndOfStream).
         size_t ReadExact(void* dst, size_t size, Error& outError);
