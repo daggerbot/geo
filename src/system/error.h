@@ -14,6 +14,7 @@
 #include <system_error>
 
 #include <fmt/format.h>
+#include <fmt/xchar.h>
 
 #include <core/types.h>
 
@@ -44,7 +45,14 @@ namespace geo {
 
         /// Writes a detailed error message to a `fmt::format_context`.
         fmt::format_context::iterator write_to(fmt::format_context& ctx) const;
+
+#ifdef _WIN32
+        /// Writes a detailed error message to a `fmt::wformat_context`.
+        fmt::wformat_context::iterator write_to(fmt::wformat_context& ctx) const;
+#endif
     };
+
+    std::string to_string(const Error& error);
 
 } // namespace geo
 
@@ -55,5 +63,15 @@ struct fmt::formatter<geo::Error, char> : formatter<std::string_view, char> {
         return error.write_to(ctx);
     }
 };
+
+#ifdef _WIN32
+template<>
+struct fmt::formatter<geo::Error, wchar_t> : formatter<std::wstring_view, wchar_t> {
+    wformat_context::iterator format(const geo::Error& error, wformat_context& ctx) const
+    {
+        return error.write_to(ctx);
+    }
+};
+#endif // defined(_WIN32_
 
 #endif // SYSTEM_ERROR_H_INCLUDED

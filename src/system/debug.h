@@ -19,6 +19,8 @@
 
 #include <core/strings.h>
 
+#include "encoding.h"
+
 // All log levels
 #define LOG_LEVEL_NONE 0
 #define LOG_LEVEL_FATAL 1
@@ -135,6 +137,7 @@ namespace geo {
 
         void init_logger();
         void shut_down_logger();
+        void enable_console();
         void set_max_log_level(LogLevel level);
         std::optional<LogLevel> parse_log_level(OsStringView str);
 
@@ -151,6 +154,40 @@ namespace geo {
 
             [[noreturn]] void exit_fatal();
 
+            // Forwards format arguments, doing conversions if necessary.
+            template<fmt::formattable<OsChar> T>
+            constexpr const T& forward(const T& arg) { return arg; }
+
+#ifdef _WIN32
+            constexpr Widen forward(char* str) { return Widen{str}; }
+            constexpr Widen forward(const char* str) { return Widen{str}; }
+            constexpr Widen forward(std::string_view str) { return Widen{str}; }
+            constexpr Widen forward(const std::string& str) { return Widen{str}; }
+#endif
+
+            // Gets an lvalue reference.
+            template<typename T>
+            constexpr T& unmove(T& t)
+            {
+                return t;
+            }
+
+            template<typename T>
+            constexpr T& unmove(T&& t)
+            {
+                return t;
+            }
+
+            // Concept for formattable (or forwardable) types.
+            template<typename T>
+            concept Formattable = requires(const T& arg) {
+                { detail::forward(arg) } -> fmt::formattable<OsChar>;
+            };
+
+            // Type returned by `forward`.
+            template<typename T>
+            using forward_t = std::remove_cvref_t<decltype(detail::forward(std::declval<const T&>()))>;
+
             // Platform-dependent implementation for all log messages.
             void vlog_src(const char* file, int line, LogLevel level, StringView fmt, FormatArgs args);
 
@@ -160,48 +197,48 @@ namespace geo {
             }
 
             // Discards a log message.
-            template<fmt::formattable<OsChar>...Args>
-            void log_nop(FormatString<Args...>, const Args&...)
+            template<Formattable...Args>
+            void log_nop(FormatString<forward_t<Args>...>, const Args&...)
             {
             }
 
             // Logs a message.
-            template<fmt::formattable<OsChar>...Args>
-            void log(LogLevel level, FormatString<Args...> fmt, const Args&...args)
+            template<Formattable...Args>
+            void log(LogLevel level, FormatString<forward_t<Args>...> fmt, const Args&...args)
             {
-                detail::vlog(level, fmt.get(), fmt::make_format_args<FormatContext>(args...));
+                detail::vlog(level, fmt.get(), fmt::make_format_args<FormatContext>(detail::unmove(detail::forward(args))...));
             }
 
             // Logs a message with a source location.
-            template<fmt::formattable<OsChar>...Args>
-            void log_src(const char* file, int line, LogLevel level, FormatString<Args...> fmt, const Args&...args)
+            template<Formattable...Args>
+            void log_src(const char* file, int line, LogLevel level, FormatString<forward_t<Args>...> fmt, const Args&...args)
             {
-                detail::vlog_src(file, line, level, fmt.get(), fmt::make_format_args<FormatContext>(args...));
+                detail::vlog_src(file, line, level, fmt.get(), fmt::make_format_args<FormatContext>(detail::unmove(detail::forward(args))...));
             }
 
             // Discards a fatal error message then exits with an error code.
-            template<fmt::formattable<OsChar>...Args>
+            template<Formattable...Args>
             [[noreturn]]
-            void fatal_silent(FormatString<Args...>, const Args&...)
+            void fatal_silent(FormatString<forward_t<Args>...>, const Args&...)
             {
                 exit_fatal();
             }
 
             // Shows a fatal error message and exits with an error code.
-            template<fmt::formattable<OsChar>...Args>
+            template<Formattable...Args>
             [[noreturn]]
-            void fatal(FormatString<Args...> fmt, const Args&...args)
+            void fatal(FormatString<forward_t<Args>...> fmt, const Args&...args)
             {
-                detail::vlog(LogLevel::fatal, fmt.get(), fmt::make_format_args<FormatContext>(args...));
+                detail::vlog(LogLevel::fatal, fmt.get(), fmt::make_format_args<FormatContext>(detail::unmove(detail::forward(args))...));
                 exit_fatal();
             }
 
             // Shows a fatal error message with a source location and exits with an error code.
-            template<fmt::formattable<OsChar>...Args>
+            template<Formattable...Args>
             [[noreturn]]
-            void fatal_src(const char* file, int line, FormatString<Args...> fmt, const Args&...args)
+            void fatal_src(const char* file, int line, FormatString<forward_t<Args>...> fmt, const Args&...args)
             {
-                detail::vlog_src(file, line, LogLevel::fatal, fmt.get(), fmt::make_format_args<FormatContext>(args...));
+                detail::vlog_src(file, line, LogLevel::fatal, fmt.get(), fmt::make_format_args<FormatContext>(detail::unmove(detail::forward(args))...));
                 exit_fatal();
             }
 

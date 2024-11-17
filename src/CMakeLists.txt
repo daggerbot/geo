@@ -33,7 +33,14 @@ target_link_libraries("geo_common"
         "libzip::zip"
 )
 
-if(UNIX)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_sources("geo_common" PRIVATE
+        "system/windows/debug.cpp"
+        "system/windows/encoding.cpp"
+        "system/windows/system.cpp"
+        "system/windows/win32.cpp"
+    )
+elseif(UNIX)
     target_sources("geo_common" PRIVATE
         "system/unix/debug.cpp"
         "system/unix/system.cpp"

@@ -28,6 +28,13 @@ namespace geo {
                 return x;
         }
 
+        /// Returns the greater of two values.
+        template<typename T>
+        constexpr T max(T x, T y)
+        {
+            return y > x ? y : x;
+        }
+
         /// Returns the lesser of two values.
         template<typename T>
         constexpr T min(T x, T y)

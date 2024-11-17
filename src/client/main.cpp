@@ -14,6 +14,9 @@
 
 #include <io/stream.h>
 #include <render/render.h>
+#ifdef _WIN32
+# include <system/windows/win32.h>
+#endif
 #include <system/cmdline.h>
 #include <system/debug.h>
 #include <system/system.h>
@@ -71,6 +74,9 @@ namespace {
         {
             if (opt == OSSTR "assets") {
                 assets_path = context.require_param();
+                return true;
+            } else if (opt == OSSTR "console") {
+                debug::enable_console();
                 return true;
             } else if (opt == OSSTR "log-level") {
                 auto param = context.require_param();
@@ -242,6 +248,7 @@ namespace {
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 {
+    win32::set_message_box_proc(&MessageBoxW);
     return client_main(__argc, __wargv);
 }
 

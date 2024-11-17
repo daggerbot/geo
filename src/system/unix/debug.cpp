@@ -62,6 +62,10 @@ void debug::shut_down_logger()
     pthread_mutex_destroy(&logger_mutex);
 }
 
+void debug::enable_console()
+{
+}
+
 void debug::detail::vlog_src(const char* file, int line, LogLevel level, StringView fmt, FormatArgs args)
 {
     const char* prefix;

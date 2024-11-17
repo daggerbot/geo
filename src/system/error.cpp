@@ -6,6 +6,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+#include "encoding.h"
 #include "error.h"
 
 using namespace geo;
@@ -78,4 +79,16 @@ fmt::format_context::iterator Error::write_to(fmt::format_context& ctx) const
     }
 
     return out;
+}
+
+#ifdef _WIN32
+fmt::wformat_context::iterator Error::write_to(fmt::wformat_context& ctx) const
+{
+    return fmt::format_to(ctx.out(), L"{}", encoding::system_to_wide(to_string(*this)));
+}
+#endif // defined(_WIN32)
+
+std::string geo::to_string(const Error& error)
+{
+    return fmt::format("{}", error);
 }
