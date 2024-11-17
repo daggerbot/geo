@@ -1,0 +1,29 @@
+/*
+ * Copyright (c) 2024 Martin Mills <daggerbot@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+#ifndef CORE_GAME_DEFS_H_INCLUDED
+#define CORE_GAME_DEFS_H_INCLUDED
+
+#include <core/types.h>
+
+#define GAME_TITLE "Geo"
+#define GAME_ID "geo"
+#define PAK_FILENAME "@PAK_FILENAME@"
+
+namespace geo {
+
+    namespace gl {
+
+        inline constexpr int major_version = @GL_MAJOR_VERSION@;
+        inline constexpr int minor_version = @GL_MINOR_VERSION@;
+
+    } // namespace gl
+
+} // namespace geo
+
+#endif // CORE_GAME_DEFS_H_INCLUDED
