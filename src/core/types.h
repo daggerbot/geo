@@ -11,11 +11,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include <type_traits>
 #include <utility>
 
 /// @def OSSTR
-/// Encodes the following string literal as an array of @ref geo::OsChar.
+/// Encodes the following string literal as an array of @ref geo::oschar_t.
 #ifdef _WIN32
 # define OSSTR L""
 #else
@@ -44,14 +45,17 @@ namespace geo {
     using f32 = float;
     using f64 = double;
 
-    /// @typedef OsChar
+    /// @typedef oschar_t
     /// Preferred character type when using the system APIs.
     /// This is typically `char`, with the notable exception that it is `wchar_t` on Windows.
 #ifdef _WIN32
-    using OsChar = wchar_t;
+    using oschar_t = wchar_t;
 #else
-    using OsChar = char;
+    using oschar_t = char;
 #endif
+
+    using OsString = std::basic_string<oschar_t>;
+    using OsStringView = std::basic_string_view<oschar_t>;
 
 } // namespace geo
 

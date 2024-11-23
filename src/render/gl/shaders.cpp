@@ -6,13 +6,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#include <glad/gl.h>
-
 #include <io/stream.h>
 #include <system/debug.h>
 
+#include "gl.h"
 #include "shaders.h"
-#include "utils.h"
 
 using namespace geo;
 using namespace geo::render;
@@ -131,8 +129,6 @@ void render::init_shaders(StreamProvider& data_source)
 {
     GlShader vert_color;
     GlShader frag_color;
-
-    LOG_INFO("Compiling shaders");
 
     vert_color.compile(data_source, "shaders/gl/color.vert", GL_VERTEX_SHADER);
 

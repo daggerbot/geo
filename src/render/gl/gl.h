@@ -6,12 +6,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#ifndef RENDER_GL_UTILS_H_INCLUDED
-#define RENDER_GL_UTILS_H_INCLUDED
+#ifndef RENDER_GL_GL_H_INCLUDED
+#define RENDER_GL_GL_H_INCLUDED
 
-#include <string>
+#include <glad/gl.h>
 
-#include "types.h"
+#include <core/game_defs.h>
 
 namespace geo {
 
@@ -25,4 +25,4 @@ namespace geo {
 
 } // namespace geo
 
-#endif // RENDER_GL_UTILS_H_INCLUDED
+#endif // RENDER_GL_GL_H_INCLUDED

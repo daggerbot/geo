@@ -15,7 +15,7 @@
 #include <math/matrix.h>
 #include <math/rect.h>
 
-#include "types.h"
+#include "gl/types.h"
 
 namespace geo {
 
@@ -24,26 +24,15 @@ namespace geo {
     /// Rendering subsystem.
     namespace render {
 
-        class GeometryBase;
-
         void init(StreamProvider& data_source);
         void shut_down();
 
         void begin_draw();
         void end_draw();
+        void present();
 
         void clear_color_buffer(Rgbaf color = {});
         void clear_depth_buffer(f32 depth = 0.0f);
-
-        void set_viewport(Recti viewport);
-        void set_full_viewport();
-
-        void select_shader(Shader shader);
-        void select_geometry(const std::shared_ptr<GeometryBase>& geometry);
-        void set_projection(const Mat4f& matrix);
-        void set_object_transform(const Mat4f& matrix);
-
-        void draw_triangles(size_t first_vertex_index, size_t vertex_count);
 
     } // namespace render
 

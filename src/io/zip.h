@@ -24,7 +24,7 @@ namespace geo {
         ZipArchive() = default;
         ZipArchive(const ZipArchive&) = delete;
         ZipArchive(ZipArchive&& other);
-        explicit ZipArchive(const OsChar* path, Error& out_error);
+        explicit ZipArchive(const oschar_t* path, Error& out_error);
         ~ZipArchive();
 
         ZipArchive& operator=(ZipArchive&& other);
@@ -32,7 +32,7 @@ namespace geo {
         void close();
         void close(Error& out_error);
         bool is_open() const { return zip_ != nullptr; }
-        bool open(const OsChar* path, Error& out_error);
+        bool open(const oschar_t* path, Error& out_error);
 
         std::unique_ptr<Stream> open_stream(const char* name, Error& out_error) override;
 

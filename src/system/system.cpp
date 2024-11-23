@@ -13,7 +13,7 @@
 
 using namespace geo;
 
-std::unique_ptr<StreamProvider> system::open_pak(const OsChar* explicit_path)
+std::unique_ptr<StreamProvider> system::open_pak(const oschar_t* explicit_path)
 {
     OsString path;
 

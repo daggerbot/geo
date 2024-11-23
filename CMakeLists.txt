@@ -17,6 +17,11 @@ set(PAK_FILE "${BINDIR}/${PAK_FILENAME}")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BINDIR}")
 
+# Include Conan packages
+if(IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/conan")
+    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/conan")
+endif()
+
 #===================================================================================================
 # Compiler options
 #===================================================================================================
@@ -68,13 +73,14 @@ set(VENV_DIR "${CMAKE_CURRENT_BINARY_DIR}/venv")
 set(VENV_BINDIR "${VENV_DIR}/bin")
 set(VENV_PYTHON "${VENV_BINDIR}/python${HOST_EXE_SUFFIX}")
 set(VENV_PIP "${VENV_BINDIR}/pip${HOST_EXE_SUFFIX}")
+set(VENV_REQFILE "${TOPDIR}/tools/python-requirements.txt")
 
 add_custom_command(
     OUTPUT "${VENV_PYTHON}" "${VENV_PIP}"
     COMMAND "${Python3_EXECUTABLE}" "-m" "venv" "${VENV_DIR}"
     COMMAND "${VENV_PIP}" "install" "-U" "pip"
-    COMMAND "${VENV_PIP}" "install" "-r" "${TOPDIR}/tools/requirements.txt"
-    DEPENDS "${TOPDIR}/tools/requirements.txt"
+    COMMAND "${VENV_PIP}" "install" "-r" "${VENV_REQFILE}"
+    DEPENDS "${VENV_REQFILE}"
     USES_TERMINAL)
 
 add_custom_target("venv" ALL DEPENDS "${VENV_PYTHON}" "${VENV_PIP}")

@@ -6,11 +6,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#include <glad/gl.h>
-
 #include <system/debug.h>
 
-#include "utils.h"
+#include "gl.h"
 
 using namespace geo;
 

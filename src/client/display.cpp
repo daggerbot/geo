@@ -24,7 +24,7 @@ namespace {
 
 void display::init()
 {
-    LOG_INFO("Creating SDL window");
+    LOG_TRACE("Creating SDL window");
 
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -47,7 +47,7 @@ void display::init()
     if (!sdl_window)
         FATAL("Can't create SDL window: {}", SDL_GetError());
 
-    LOG_INFO("Creating OpenGL context");
+    LOG_TRACE("Creating OpenGL context");
 
     gl_context = SDL_GL_CreateContext(sdl_window);
 
@@ -73,7 +73,7 @@ void display::shut_down()
     gl_context = nullptr;
 }
 
-Vec2i display::get_window_size()
+Vec2i display::size()
 {
     Vec2i size = {0, 0};
 
@@ -81,12 +81,12 @@ Vec2i display::get_window_size()
     return size;
 }
 
-void display::swap_buffers()
-{
-    SDL_GL_SwapWindow(sdl_window);
-}
-
 void* display::gl_get_proc_address(const char* name)
 {
     return SDL_GL_GetProcAddress(name);
+}
+
+void display::gl_swap_buffers()
+{
+    SDL_GL_SwapWindow(sdl_window);
 }

@@ -11,8 +11,6 @@
 
 #include <memory>
 
-#include <render/geometry.h>
-
 #include "main.h"
 
 namespace geo {
@@ -22,9 +20,6 @@ namespace geo {
     public:
         void begin_state() override;
         void render(u32 delta_ms) override;
-
-    private:
-        std::shared_ptr<render::Geometry> geometry_;
     };
 
 } // namespace geo

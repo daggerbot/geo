@@ -6,25 +6,21 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#ifndef CORE_STRINGS_H_INCLUDED
-#define CORE_STRINGS_H_INCLUDED
+#ifndef CORE_STR_H_INCLUDED
+#define CORE_STR_H_INCLUDED
 
-#include <string>
-
-#include "types.h"
+#include "concepts.h"
 
 namespace geo {
-
-    using OsString = std::basic_string<OsChar>;
-    using OsStringView = std::basic_string_view<OsChar>;
 
     /// String utility functions.
     namespace str {
 
         /// Finds the first occurrence of `ch` in `str`. If `ch` is zero, this finds the terminating
         /// null character. Returns null if `ch` is not found in `str`.
-        template<typename CharT>
-        constexpr const CharT* find(const CharT* str, CharT ch)
+        template<CoreInt CharT, CoreInt Ch>
+        constexpr CharT* find(CharT* str, Ch ch)
+        requires Equatable<CharT, Ch>
         {
             if (!str)
                 return nullptr;
@@ -40,7 +36,7 @@ namespace geo {
         }
 
         /// Gets the length of a null-terminated string.
-        template<typename CharT>
+        template<CoreInt CharT>
         constexpr size_t length(const CharT* str)
         {
             size_t len = 0;
@@ -58,4 +54,4 @@ namespace geo {
 
 } // namespace geo
 
-#endif // CORE_STRINGS_H_INCLUDED
+#endif // CORE_STR_H_INCLUDED

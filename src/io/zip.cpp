@@ -75,7 +75,7 @@ ZipArchive::ZipArchive(ZipArchive&& other)
     other.zip_ = nullptr;
 }
 
-ZipArchive::ZipArchive(const OsChar* path, Error& out_error)
+ZipArchive::ZipArchive(const oschar_t* path, Error& out_error)
 {
     open(path, out_error);
 }
@@ -116,7 +116,7 @@ void ZipArchive::close(Error& out_error)
     zip_ = nullptr;
 }
 
-bool ZipArchive::open(const OsChar* path, Error& out_error)
+bool ZipArchive::open(const oschar_t* path, Error& out_error)
 {
     close();
 

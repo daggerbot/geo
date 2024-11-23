@@ -12,7 +12,7 @@
 #include <memory>
 #include <span>
 
-#include <core/strings.h>
+#include <core/str.h>
 
 namespace geo {
 
@@ -25,7 +25,7 @@ namespace geo {
         OsString get_default_pak_path();
 
         /// Opens the asset PAK. If `path` is null, @ref get_default_pak_path is used.
-        std::unique_ptr<StreamProvider> open_pak(const OsChar* path);
+        std::unique_ptr<StreamProvider> open_pak(const oschar_t* path);
 
     } // namespace system
 

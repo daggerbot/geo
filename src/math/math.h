@@ -9,7 +9,7 @@
 #ifndef GEO_MATH_MATH_H_INCLUDED
 #define GEO_MATH_MATH_H_INCLUDED
 
-#include <core/types.h>
+#include <core/concepts.h>
 
 namespace geo {
 
@@ -17,7 +17,7 @@ namespace geo {
     namespace math {
 
         /// Clamps `x` between `min` and `max`.
-        template<typename T>
+        template<Ordered T>
         constexpr T clamp(T x, T min, T max)
         {
             if (x < min)
@@ -29,14 +29,14 @@ namespace geo {
         }
 
         /// Returns the greater of two values.
-        template<typename T>
+        template<Ordered T>
         constexpr T max(T x, T y)
         {
             return y > x ? y : x;
         }
 
         /// Returns the lesser of two values.
-        template<typename T>
+        template<Ordered T>
         constexpr T min(T x, T y)
         {
             return y < x ? y : x;

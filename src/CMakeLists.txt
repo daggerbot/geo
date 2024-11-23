@@ -10,28 +10,19 @@ set(GL_VERSION "4.5")
 # geo_common: Code shared between the client and dedicated server
 #===================================================================================================
 
-find_package("fmt" REQUIRED)
-find_package("libzip" REQUIRED)
+find_package("fmt" REQUIRED CONFIG)
+find_package("libzip" REQUIRED CONFIG)
 
 add_library("geo_common" STATIC
     "io/error.cpp"
     "io/stream.cpp"
     "io/zip.cpp"
-    "system/cmdline.cpp"
     "system/debug.cpp"
     "system/error.cpp"
     "system/system.cpp"
 )
 
 target_include_directories("geo_common" PUBLIC ".")
-
-target_link_libraries("geo_common"
-    PUBLIC
-        "fmt::fmt"
-    PRIVATE
-        "geo_compiler_options"
-        "libzip::zip"
-)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_sources("geo_common" PRIVATE
@@ -47,22 +38,32 @@ elseif(UNIX)
     )
 endif()
 
+target_link_libraries("geo_common"
+    PUBLIC
+        "fmt::fmt"
+    PRIVATE
+        "geo_compiler_options"
+        "libzip::zip"
+)
+
 #===================================================================================================
 # geo_client
 #===================================================================================================
-
-find_package("SDL2" REQUIRED)
 
 add_executable("geo_client" WIN32
     "client/display.cpp"
     "client/main.cpp"
     "client/playground.cpp"
-    "render/gl/buffer.cpp"
-    "render/gl/geometry.cpp"
+    "render/gl/gl.cpp"
     "render/gl/render.cpp"
     "render/gl/shaders.cpp"
-    "render/gl/utils.cpp"
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    find_package("SDL2" REQUIRED CONFIG)
+else()
+    find_package("SDL2" REQUIRED MODULE)
+endif()
 
 target_link_libraries("geo_client" PRIVATE
     "geo_compiler_options"

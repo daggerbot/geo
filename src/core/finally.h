@@ -10,7 +10,6 @@
 #define CORE_FINALLY_H_INCLUDED
 
 #include <concepts>
-#include <type_traits>
 
 #include "types.h"
 

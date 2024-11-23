@@ -18,10 +18,10 @@ namespace geo {
 
         void init();
         void shut_down();
-        Vec2i get_window_size();
-        void swap_buffers();
+        Vec2i size();
 
         void* gl_get_proc_address(const char* name);
+        void gl_swap_buffers();
 
     } // namespace display
 

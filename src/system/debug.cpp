@@ -21,26 +21,6 @@ void debug::set_max_log_level(LogLevel level)
     detail::max_log_level = math::clamp(level, LogLevel::none, LogLevel(LOG_LEVEL_MAX));
 }
 
-std::optional<LogLevel> debug::parse_log_level(OsStringView str)
-{
-    if (str == OSSTR "none")
-        return LogLevel::none;
-    else if (str == OSSTR "fatal")
-        return LogLevel::fatal;
-    else if (str == OSSTR "error")
-        return LogLevel::error;
-    else if (str == OSSTR "warning")
-        return LogLevel::warning;
-    else if (str == OSSTR "info")
-        return LogLevel::info;
-    else if (str == OSSTR "debug")
-        return LogLevel::debug;
-    else if (str == OSSTR "trace")
-        return LogLevel::trace;
-    else
-        return {};
-}
-
 void debug::detail::exit_fatal()
 {
     std::exit(EXIT_FAILURE);
